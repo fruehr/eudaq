@@ -199,8 +199,10 @@ namespace eudaq{
 	break;
       }
       StandardPlane plane(id, "NI", "MIMOSA26");
-      plane.SetSizeZS(1152, 576, 0, 2, StandardPlane::FLAG_WITHPIVOT |
-		      StandardPlane::FLAG_DIFFCOORDS | StandardPlane::FLAG_ACCUMULATE);
+      //plane.SetSizeZS(1152, 576, 0, 2, //StandardPlane::FLAG_WITHPIVOT |
+		  //    StandardPlane::FLAG_DIFFCOORDS | StandardPlane::FLAG_ACCUMULATE);
+		  plane.SetSizeZS(1152, 576, 0, 2, StandardPlane::FLAG_WITHPIVOT |
+		     StandardPlane::FLAG_DIFFCOORDS );
       // plane.SetTLUEvent(tluid);
       plane.SetPivotPixel((9216 + pivot + PIVOTPIXELOFFSET) % 9216);
       DecodeFrame(plane, len0, it0 + 8, 0);

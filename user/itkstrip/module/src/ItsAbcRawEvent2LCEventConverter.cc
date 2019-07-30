@@ -39,20 +39,24 @@ bool ItsAbcRawEvent2LCEventConverter::Converting(eudaq::EventSPC d1, eudaq::LCEv
   auto block_n_list = raw->GetBlockNumList();
   for(auto &block_n: block_n_list){
     std::vector<uint8_t> block = raw->GetBlock(block_n);
+    if(block_n > 3) continue;
+    if(block_n > 1 && raw->GetRunN() >= 1347) continue; // only one hybrid running
     std::vector<bool> channels;
     eudaq::uchar2bool(block.data(), block.data() + block.size(), channels);
     lcio::CellIDEncoder<lcio::TrackerDataImpl> zsDataEncoder("sensorID:7,sparsePixelType:5",
 							     zsDataCollection);
-    zsDataEncoder["sensorID"] = block_n + PLANE_ID_OFFSET_ABC;
     zsDataEncoder["sparsePixelType"] = 2;
+    if(raw->GetRunN() >= 1578) block_n = block_n + 2; // only H1 running, to keep consistent plane IDs
+    zsDataEncoder["sensorID"] = block_n + PLANE_ID_OFFSET_ABC;
     auto zsFrame = new lcio::TrackerDataImpl;
     zsDataEncoder.setCellID(zsFrame);
+    int offset = (block_n == 2 || block_n == 3) ? 256 : 0;
     for(size_t i = 0; i < channels.size(); ++i) {
       if (channels[i]){
-	zsFrame->chargeValues().push_back(i);//x
-	zsFrame->chargeValues().push_back(1);//y
-	zsFrame->chargeValues().push_back(1);//signal
-	zsFrame->chargeValues().push_back(0);//time
+        zsFrame->chargeValues().push_back(i-offset);//x
+        zsFrame->chargeValues().push_back(1);//y
+        zsFrame->chargeValues().push_back(1);//signal
+        zsFrame->chargeValues().push_back(0);//time
       }
     }
     zsDataCollection->push_back(zsFrame);

@@ -18,5 +18,8 @@ bool TluRawEvent2LCEventConverter::Converting(eudaq::EventSPC d1, eudaq::LCEvent
   d2impl->setEventNumber(d1->GetEventNumber());
   d2impl->setRunNumber(d1->GetRunNumber());
   d2impl->parameters().setValue("EventType", 2); //( eutelescope::EUTELESCOPE::EVENTTYPE, eutelescope::kDE )
+  std::string trigger_tag = d1->GetTag("trigger","9999"); // 9999 means failure
+  //std::cout << trigger_tag << std::endl;
+  d2impl->parameters().setValue("trigger", trigger_tag);
   return true;    
 }
