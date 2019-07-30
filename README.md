@@ -1,3 +1,6 @@
+(for ITKstrip .raw data conversion, cmake command from build directory should be:
+cmake -DUSER_ITKSTRIP_BUILD=ON -DEUDAQ_LIBRARY_BUILD_LCIO=ON -DUSER_TLU_BUILD=ON ../     )
+
 EUDAQ version 2
 =====
 
