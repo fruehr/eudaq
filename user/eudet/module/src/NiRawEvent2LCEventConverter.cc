@@ -102,7 +102,7 @@ namespace eudaq{
     }
     
     if (zsDataCollection->size() != 0)
-      result.addCollection(zsDataCollection, "zsdata_m26");
+      result.addCollection(zsDataCollection, "zsdata");
     else
       delete zsDataCollection; // clean up if not storing the collection here
     

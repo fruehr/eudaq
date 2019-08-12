@@ -62,6 +62,9 @@ bool ItsTtcRawEvent2LCEventConverter::Converting(eudaq::EventSPC d1, eudaq::LCEv
       uint64_t timestamp = data & 0x000000ffffffffffULL;
       uint32_t L0ID = (uint32_t)(data >> 40) & 0xffff;
       d2->parameters().setValue("TS.DATA", std::to_string(timestamp));
+            int TTCBCID = (((timestamp << 1) &0x00f) >>1);
+      d2->parameters().setValue("TTC.BCID", TTCBCID);
+      //std::cout <<  raw->GetEventNumber() << " " <<  TTCBCID << std::endl;
       d2->parameters().setValue("TS.L0ID", std::to_string(L0ID));
       break;
     }

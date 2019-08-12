@@ -39,6 +39,34 @@ bool ItsAbcRawEvent2LCEventConverter::Converting(eudaq::EventSPC d1, eudaq::LCEv
   auto block_n_list = raw->GetBlockNumList();
   for(auto &block_n: block_n_list){
     std::vector<uint8_t> block = raw->GetBlock(block_n);
+    // save info for desync detection
+    if(block_n>6) continue;
+    if(block_n==6) {
+      size_t size_of_TTC = block.size() /sizeof(uint64_t);
+      const uint64_t *TTC = nullptr;
+      uint64_t TLUIDRAW;
+      if (size_of_TTC) {
+        TTC = reinterpret_cast<const uint64_t *>(block.data());
+      }
+      size_t j = 0;
+      for (size_t i = 0; i < size_of_TTC; ++i) {
+        uint64_t data = TTC[i];
+        if (i==0) {    //RAW fixing for ABC*
+          int BCID = (data & 0x0000000000f0000) >> 17;
+          int parity = (((data & 0x0000000000f0000) >> 1) & 0x00000000000f000) >> 15; //ugly, but it works
+          int ten = (data & 0x000000f00000000)>>32;
+          int one = (data & 0x000000000f00000)>>20;
+          int L0ID = ten*10 + one;
+          //std::cout << raw->GetEventN() << "   " << block_n << "   " << BCID << "   " << parity << "   " << L0ID << std::endl;
+          d2->parameters().setValue("RAWBCID", BCID); //ABCStar
+          d2->parameters().setValue("RAWparity", parity); //ABCStar
+          d2->parameters().setValue("RAWL0ID", L0ID); //ABCStar			
+        }
+      }
+      // -----
+      continue; 
+    }
+    
     std::vector<bool> channels;
     eudaq::uchar2bool(block.data(), block.data() + block.size(), channels);
     lcio::CellIDEncoder<lcio::TrackerDataImpl> zsDataEncoder("sensorID:7,sparsePixelType:5",
@@ -47,12 +75,13 @@ bool ItsAbcRawEvent2LCEventConverter::Converting(eudaq::EventSPC d1, eudaq::LCEv
     zsDataEncoder["sparsePixelType"] = 2;
     auto zsFrame = new lcio::TrackerDataImpl;
     zsDataEncoder.setCellID(zsFrame);
+    int offset = (block_n == 2 || block_n == 3) ? 256 : 0; // ASIC numbering on R0H1 starts at 2 for April testbeam
     for(size_t i = 0; i < channels.size(); ++i) {
       if (channels[i]){
-	zsFrame->chargeValues().push_back(i);//x
-	zsFrame->chargeValues().push_back(1);//y
-	zsFrame->chargeValues().push_back(1);//signal
-	zsFrame->chargeValues().push_back(0);//time
+        zsFrame->chargeValues().push_back(i-offset);//x
+        zsFrame->chargeValues().push_back(1);//y
+        zsFrame->chargeValues().push_back(1);//signal
+        zsFrame->chargeValues().push_back(0);//time
       }
     }
     zsDataCollection->push_back(zsFrame);

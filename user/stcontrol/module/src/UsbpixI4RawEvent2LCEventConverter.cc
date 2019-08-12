@@ -40,7 +40,7 @@ private:
 
 
   uint32_t first_sensor_id = 0;
-  uint32_t chip_id_offset = 10;
+  uint32_t chip_id_offset = 7;
 };
 
 namespace{
